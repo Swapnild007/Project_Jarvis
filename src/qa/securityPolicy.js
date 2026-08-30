@@ -1,0 +1,2 @@
+export const securityPolicy={noSecretsInClient:true,noHardcodedCredentials:true,validateImportedState:true,protectLockedModules:true,requireHttpsInProduction:true,leastPrivilege:true,dependencyAuditRequired:true,buildMustPass:true};
+export function securityGate(results={}){const failed=Object.entries(securityPolicy).filter(([k,v])=>v&&!results[k]).map(([k])=>k);return {passed:failed.length===0,failed};}

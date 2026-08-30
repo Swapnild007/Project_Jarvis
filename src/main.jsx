@@ -11,6 +11,7 @@ import './phase23.css';
 import { SKILLS, DOMAINS } from './data/careerGraph';
 import { BASELINE_QUESTIONS } from './data/baselineQuestions';
 import { createInitialSkills, LEVELS, selectNextMission, applyAssessment } from './engine/careerEngine';
+import { calculateReadiness } from './engine/intelligenceEngine';
 import { ModuleWorkspace } from './integration/moduleWorkspace.jsx';
 
 const modules = [
@@ -79,11 +80,12 @@ function App() {
 function Dashboard({ state, days, query, setQuery, setMission, setActive }) {
   const mission = selectNextMission(state);
   const tracked = Object.values(state.skills).filter((skill) => skill.level > 0).length;
+  const readiness = calculateReadiness(state);
   return <>
     <section className="hero"><div><p className="eyebrow">NORTH STAR</p><h1>Career transformation<br /><em>before 29 Nov 2028.</em></h1><p className="muted">A persistent operating system for moving from WFM/RTA into Cybersecurity, Security Engineering and AI/LLM/Agent Security.</p></div><div className="count"><strong>{days}</strong><span>DAYS REMAINING</span></div></section>
     <section className="grid">
       <article className="card mission"><div className="card-head"><span>CURRENT MISSION</span><Command size={17} /></div><h2>{mission.title}</h2><p>{mission.reason}</p><button onClick={() => setActive(state.baseline ? '03' : '07')}><Play size={15} />{state.baseline ? 'Open mission' : 'Start baseline'}<ChevronRight size={16} /></button></article>
-      <article className="card readiness"><div className="card-head"><span>READINESS</span><Activity size={17} /></div><div className="readiness-value">{state.baseline ? 'ACTIVE' : 'INITIALIZE'}</div><div className="bar"><i style={{ width: state.baseline ? '18%' : '2%' }} /></div><p>{state.baseline ? `${tracked} capabilities have evidence.` : 'Baseline assessment required before progression.'}</p></article>
+      <article className="card readiness"><div className="card-head"><span>READINESS</span><Activity size={17} /></div><div className="readiness-value">{state.baseline ? `${readiness}%` : 'INITIALIZE'}</div><div className="bar"><i style={{ width: state.baseline ? `${readiness}%` : '2%' }} /></div><p>{state.baseline ? `${tracked} capabilities assessed. Readiness is evidence-weighted.` : 'Baseline assessment required before progression.'}</p></article>
       <article className="card"><div className="card-head"><span>CAREER STATE</span><Database size={17} /></div><div className="state-row"><span>Phase</span><b>{state.phase}</b></div><div className="state-row"><span>Baseline</span><b>{state.baseline ? 'COMPLETE' : 'PENDING'}</b></div><div className="state-row"><span>Skills tracked</span><b>{tracked}/{SKILLS.length}</b></div></article>
       <article className="card"><div className="card-head"><span>SYSTEM FLOW</span><GitBranch size={17} /></div><div className="flow">ASSESS <ChevronRight /> LEARN <ChevronRight /> PRACTICE <ChevronRight /> LAB <ChevronRight /> PROVE</div><p>Progress requires evidence. Certificates alone never create mastery.</p></article>
     </section>
@@ -124,7 +126,7 @@ function SkillMatrix({ state }) {
 function NextMission({ state, setMission }) {
   const mission = selectNextMission(state);
   const skill = mission.skillId && SKILLS.find((item) => item.id === mission.skillId);
-  return <section className="module-page"><div className="module-icon"><Command size={28} /></div><p className="eyebrow">MODULE 03 · DECISION ENGINE</p><h1>Next Mission Engine</h1><p className="module-copy">JARVIS selects the highest-value action from the current state and prerequisite graph. It does not follow a hardcoded course sequence.</p><div className="mission-focus card"><div className="card-head"><span>RECOMMENDED NEXT</span><Target size={17} /></div><h2>{mission.title}</h2><p>{mission.reason}</p>{skill && <><div className="state-row"><span>Domain</span><b>{skill.domain}</b></div><div className="state-row"><span>Prerequisites</span><b>{skill.prerequisites.length ? skill.prerequisites.map((id) => SKILLS.find((item) => item.id === id)?.name).join(', ') : 'None'}</b></div></>}<button onClick={() => setMission(mission.title)}><Play size={15} /> Accept mission</button></div></section>;
+  return <section className="module-page"><div className="module-icon"><Command size={28} /></div><p className="eyebrow">MODULE 03 · DECISION ENGINE</p><h1>Next Mission Engine</h1><p className="module-copy">JARVIS selects the highest-value action from the current state and prerequisite graph. It does not follow a hardcoded course sequence.</p><div className="mission-focus card"><div className="card-head"><span>RECOMMENDED NEXT</span><Target size={17} /></div><h2>{mission.title}</h2><p>{mission.reason}</p>{mission.trace && <div className="trace"><p className="eyebrow">DECISION TRACE</p>{mission.trace.map((item, index) => <div key={index}><span>{index + 1}</span>{item}</div>)}</div>}{skill && <><div className="state-row"><span>Domain</span><b>{skill.domain}</b></div><div className="state-row"><span>Prerequisites</span><b>{skill.prerequisites.length ? skill.prerequisites.map((id) => SKILLS.find((item) => item.id === id)?.name).join(', ') : 'None'}</b></div>{mission.intelligence && <div className="state-row"><span>Priority score</span><b>{mission.intelligence.priority}</b></div>}</>}<button onClick={() => setMission(mission.title)}><Play size={15} /> Accept mission</button></div></section>;
 }
 
 createRoot(document.getElementById('root')).render(<App />);

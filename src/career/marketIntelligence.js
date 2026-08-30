@@ -1,0 +1,4 @@
+export const roleFamilies=['Cybersecurity Analyst','SOC Analyst','Security Engineer','Cloud Security Engineer','Application Security Engineer','Detection Engineer','AI Security Engineer','AI/LLM Security Researcher'];
+export function marketFit(profile={}, role={}){const skills=profile.skills||{};const required=role.skills||[];const matched=required.filter(id=>(skills[id]?.level||0)>=(role.minimumLevel?.[id]||1));const gaps=required.filter(id=>!matched.includes(id));return {role:role.name,fitPct:required.length?Math.round(matched.length/required.length*100):0,matched,gaps};}
+export function prioritizeRoles(roles=[],profile={}){return roles.map(r=>marketFit(profile,r)).sort((a,b)=>b.fitPct-a.fitPct);}
+export function opportunityEvidence(item){return {source:item.source||'unknown',publishedAt:item.publishedAt||null,verified:Boolean(item.source&&item.publishedAt),skills:item.skills||[],seniority:item.seniority||'unspecified'};}

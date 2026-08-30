@@ -1,21 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import {
-  BookOpen,
-  CheckCircle2,
-  ChevronRight,
-  Database,
-  FlaskConical,
-  Play,
-  Search,
-  Shield,
-  Target,
-  TrendingUp,
-  Upload,
-  Settings,
-  Brain,
-  Activity,
-  GitBranch,
+  BookOpen, CheckCircle2, ChevronRight, Database, FlaskConical, Play,
+  Search, Shield, Target, TrendingUp, Upload, Settings, Brain, Activity,
+  GitBranch, Download, RotateCcw, Lock, SlidersHorizontal,
 } from 'lucide-react';
+import { downloadBackup, restoreBackup, clearCareerState, STATE_SCHEMA_VERSION } from './stateStore';
 
 const ACTIONS = {
   '01': ['Assess career position', 'Define capability architecture', 'Review North Star'],
@@ -41,134 +30,153 @@ const ACTIONS = {
   '21': ['Compare certifications', 'Check readiness', 'Build certification plan'],
   '22': ['Write journal entry', 'Review learning history', 'Search knowledge'],
   '23': ['Open progress analytics', 'Inspect trends', 'Review evidence growth'],
-  '24': ['Create backup', 'Validate recovery', 'Export Career State'],
-  '25': ['Open system settings', 'Review locked modules', 'Inspect system policy'],
+  '24': ['Create backup', 'Restore backup', 'Validate recovery'],
+  '25': ['Review system settings', 'Inspect persistence', 'Review system policy'],
 };
 
 const ICONS = {
-  '01': Brain,
-  '02': Target,
-  '03': Target,
-  '04': Database,
-  '05': BookOpen,
-  '06': GitBranch,
-  '07': CheckCircle2,
-  '08': Activity,
-  '09': FlaskConical,
-  '10': GitBranch,
-  '11': GitBranch,
-  '12': Shield,
-  '13': Brain,
-  '14': GitBranch,
-  '15': Shield,
-  '16': Search,
-  '17': TrendingUp,
-  '18': Shield,
-  '19': Target,
-  '20': BookOpen,
-  '21': BookOpen,
-  '22': BookOpen,
-  '23': Activity,
-  '24': Upload,
-  '25': Settings,
+  '01': Brain, '02': Target, '03': Target, '04': Database, '05': BookOpen,
+  '06': GitBranch, '07': CheckCircle2, '08': Activity, '09': FlaskConical,
+  '10': GitBranch, '11': GitBranch, '12': Shield, '13': Brain, '14': GitBranch,
+  '15': Shield, '16': Search, '17': TrendingUp, '18': Shield, '19': Target,
+  '20': BookOpen, '21': BookOpen, '22': BookOpen, '23': Activity,
+  '24': Upload, '25': Settings,
 };
+
+function recordAction(name, id, label, setState, setMission) {
+  setMission(`${name}: ${label}`);
+  setState((current) => ({
+    ...current,
+    evidence: { ...(current.evidence || {}), [id]: { action: label, at: new Date().toISOString() } },
+    activity: [
+      { text: `${name}: ${label}`, time: new Date().toLocaleTimeString(), type: 'module' },
+      ...(current.activity || []),
+    ].slice(0, 20),
+  }));
+}
 
 export function ModuleWorkspace({ module, state, setState, setMission }) {
   const [id, name] = module || [];
+  if (id === '24') return <BackupWorkspace state={state} setState={setState} setMission={setMission} />;
+  if (id === '25') return <SettingsWorkspace state={state} setState={setState} setMission={setMission} />;
+
   const Icon = ICONS[id] || Brain;
   const actions = ACTIONS[id] || [];
   const [active, setActive] = useState(0);
   const evidence = state.evidence || {};
 
-  const run = () => {
-    const label = actions[active] || 'Review module';
-    setMission(`${name}: ${label}`);
-    setState((current) => ({
-      ...current,
-      evidence: {
-        ...current.evidence,
-        [id]: { action: label, at: new Date().toISOString() },
-      },
-      activity: [
-        {
-          text: `${name}: ${label}`,
-          time: new Date().toLocaleTimeString(),
-          type: 'module',
-        },
-        ...current.activity,
-      ].slice(0, 20),
-    }));
-  };
-
+  const run = () => recordAction(name, id, actions[active] || 'Review module', setState, setMission);
   const readiness = useMemo(() => Object.keys(evidence).length, [evidence]);
 
   return (
     <section className="module-page">
-      <div className="module-icon">
-        <Icon size={28} />
-      </div>
+      <div className="module-icon"><Icon size={28} /></div>
       <p className="eyebrow">MODULE {id} · FUNCTIONAL WORKSPACE</p>
       <h1>{name}</h1>
-      <p className="module-copy">
-        This workspace operates on the shared Career State. Actions create
-        traceable activity and evidence rather than pretending that opening a
-        page equals mastery.
-      </p>
+      <p className="module-copy">This workspace operates on the shared Career State. Actions create traceable activity and evidence rather than pretending that opening a page equals mastery.</p>
       <div className="module-grid">
         <div className="card">
-          <div className="card-head">
-            <span>MISSION WORKSPACE</span>
-            <Target size={16} />
-          </div>
+          <div className="card-head"><span>MISSION WORKSPACE</span><Target size={16} /></div>
           <h2>{actions[active]}</h2>
-          <p>
-            Choose an operation, execute it, then record what you actually
-            learned, built, tested or proved.
-          </p>
+          <p>Choose an operation, execute it, then record what you actually learned, built, tested or proved.</p>
           <div className="action-list">
-            {actions.map((action, index) => (
-              <button
-                key={action}
-                className={active === index ? 'selected' : ''}
-                onClick={() => setActive(index)}
-              >
-                <span>{String(index + 1).padStart(2, '0')}</span>
-                {action}
-                <ChevronRight size={15} />
-              </button>
-            ))}
+            {actions.map((action, index) => <button key={action} className={active === index ? 'selected' : ''} onClick={() => setActive(index)}><span>{String(index + 1).padStart(2, '0')}</span>{action}<ChevronRight size={15} /></button>)}
           </div>
-          <button onClick={run}>
-            <Play size={15} /> Execute action
-          </button>
+          <button onClick={run}><Play size={15} /> Execute action</button>
         </div>
         <div className="card">
-          <div className="card-head">
-            <span>CAREER STATE</span>
-            <Database size={16} />
-          </div>
-          <div className="state-row">
-            <span>Phase</span>
-            <b>{state.phase}</b>
-          </div>
-          <div className="state-row">
-            <span>Current mission</span>
-            <b>{state.currentMission}</b>
-          </div>
-          <div className="state-row">
-            <span>Module evidence</span>
-            <b>{evidence[id] ? 'RECORDED' : 'NONE'}</b>
-          </div>
-          <div className="state-row">
-            <span>Evidence modules</span>
-            <b>{readiness}</b>
-          </div>
-          <p className="muted">
-            Evidence is durable only when tied to an action, result, artifact
-            or assessment.
-          </p>
+          <div className="card-head"><span>CAREER STATE</span><Database size={16} /></div>
+          <div className="state-row"><span>Phase</span><b>{state.phase}</b></div>
+          <div className="state-row"><span>Current mission</span><b>{state.currentMission}</b></div>
+          <div className="state-row"><span>Module evidence</span><b>{evidence[id] ? 'RECORDED' : 'NONE'}</b></div>
+          <div className="state-row"><span>Evidence modules</span><b>{readiness}</b></div>
+          <p className="muted">Evidence is durable only when tied to an action, result, artifact or assessment.</p>
         </div>
       </div>
+    </section>
+  );
+}
+
+function BackupWorkspace({ state, setState, setMission }) {
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const exportState = () => {
+    downloadBackup(state);
+    setMessage('Backup exported successfully.');
+    setMission('Backup / Recovery: Export Career State');
+  };
+  const importState = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    restoreBackup(file, (restored) => {
+      setState(restored);
+      setMessage('Backup restored. Career State reloaded.');
+      setBusy(false);
+      setMission('Backup / Recovery: Restore Career State');
+    }, (error) => {
+      setMessage(error.message);
+      setBusy(false);
+    });
+    event.target.value = '';
+  };
+  return (
+    <section className="module-page">
+      <div className="module-icon"><Upload size={28} /></div>
+      <p className="eyebrow">MODULE 24 · RECOVERY CONTROL</p>
+      <h1>Backup / Recovery / Export</h1>
+      <p className="module-copy">Your Career State stays in the browser, but it should never be trapped there. Export a versioned JSON backup and restore it on a new browser or device.</p>
+      <div className="module-grid">
+        <div className="card">
+          <div className="card-head"><span>BACKUP</span><Download size={16} /></div>
+          <h2>Export complete Career State</h2>
+          <p>Includes skills, assessments, evidence, missions and activity.</p>
+          <button onClick={exportState}><Download size={15} /> Export JSON backup</button>
+        </div>
+        <div className="card">
+          <div className="card-head"><span>RECOVERY</span><RotateCcw size={16} /></div>
+          <h2>Restore a JARVIS backup</h2>
+          <p>Only files created by JARVIS Career OS are accepted.</p>
+          <label className="file-button"><Upload size={15} /> {busy ? 'Reading backup…' : 'Choose backup file'}<input type="file" accept="application/json,.json" onChange={importState} /></label>
+        </div>
+      </div>
+      <div className="card status-card"><div className="state-row"><span>Schema</span><b>v{STATE_SCHEMA_VERSION}</b></div><div className="state-row"><span>Current state</span><b>{state.baseline ? 'ACTIVE' : 'INITIALIZE'}</b></div>{message && <p>{message}</p>}</div>
+    </section>
+  );
+}
+
+function SettingsWorkspace({ state, setState, setMission }) {
+  const [confirm, setConfirm] = useState(false);
+  const settings = state.settings || { reducedMotion: false, compactMode: false };
+  const update = (key, value) => setState((current) => ({ ...current, settings: { ...(current.settings || {}), [key]: value } }));
+  const reset = () => {
+    if (!confirm) { setConfirm(true); return; }
+    clearCareerState();
+    window.location.reload();
+  };
+  return (
+    <section className="module-page">
+      <div className="module-icon"><Settings size={28} /></div>
+      <p className="eyebrow">MODULE 25 · SYSTEM CONTROL</p>
+      <h1>JARVIS System Settings</h1>
+      <p className="module-copy">System-level controls are intentionally conservative. Settings affect presentation and recovery behavior, never the locked career architecture.</p>
+      <div className="module-grid">
+        <div className="card">
+          <div className="card-head"><span>INTERFACE</span><SlidersHorizontal size={16} /></div>
+          <label className="setting-row"><span>Reduced motion</span><input type="checkbox" checked={!!settings.reducedMotion} onChange={(e) => update('reducedMotion', e.target.checked)} /></label>
+          <label className="setting-row"><span>Compact mode</span><input type="checkbox" checked={!!settings.compactMode} onChange={(e) => update('compactMode', e.target.checked)} /></label>
+          <div className="state-row"><span>Persistence</span><b>LOCAL STATE ACTIVE</b></div>
+        </div>
+        <div className="card">
+          <div className="card-head"><span>SAFETY</span><Lock size={16} /></div>
+          <p>Locked career modules cannot be rewritten by normal module actions.</p>
+          <div className="state-row"><span>Career architecture</span><b>PROTECTED</b></div>
+          <div className="state-row"><span>State schema</span><b>v{STATE_SCHEMA_VERSION}</b></div>
+          <button className="danger" onClick={reset}><RotateCcw size={15} /> {confirm ? 'Confirm full reset' : 'Reset local Career State'}</button>
+          {confirm && <button onClick={() => setConfirm(false)}>Cancel</button>}
+        </div>
+      </div>
+      <div className="card status-card"><CheckCircle2 size={16} /> Settings are stored inside the shared Career State.</div>
     </section>
   );
 }

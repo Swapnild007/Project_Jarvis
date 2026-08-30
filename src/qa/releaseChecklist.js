@@ -1,0 +1,2 @@
+export const RELEASE_CHECKLIST=['25 module coverage','shared Career State','mission recalculation','learning and revision flow','lab and project evidence','career intelligence','security policy','backup and recovery','responsive UI','production build'];
+export function releaseReport(results={}){const items=RELEASE_CHECKLIST.map(name=>({name,pass:Boolean(results[name])}));const passed=items.filter(x=>x.pass).length;return {items,passed,total:items.length,ready:passed===items.length,status:passed===items.length?'GO':'BLOCKED'};}

@@ -1,0 +1,7 @@
+export const projectStates=['IDEA','PLANNED','BUILDING','BLOCKED','TESTING','COMPLETED','PUBLISHED'];
+export function createProject({id,title,goal,skillIds=[],deliverables=[],acceptanceCriteria=[]}){return {id,title,goal,skillIds,deliverables,acceptanceCriteria,state:'IDEA',evidence:[],risks:[],milestones:[],createdAt:new Date().toISOString()};}
+export function setProjectState(project,state){if(!projectStates.includes(state))throw new Error('Invalid project state');return {...project,state};}
+export function addMilestone(project,milestone){if(!milestone?.title)throw new Error('Milestone requires a title');return {...project,milestones:[...project.milestones,{...milestone,status:milestone.status||'PENDING'}]};}
+export function addProjectEvidence(project,evidence){if(!evidence?.type||!evidence?.reference)throw new Error('Project evidence requires type and reference');return {...project,evidence:[...project.evidence,{...evidence,createdAt:new Date().toISOString()}]};}
+export function projectReadiness(project){const criteria=project.acceptanceCriteria?.length||0;const satisfied=project.acceptanceCriteria?.filter(c=>c.complete).length||0;const evidence=project.evidence?.length||0;return criteria?Math.round((satisfied/criteria)*80+Math.min(evidence,4)*5):Math.min(evidence,4)*5;}
+export function isPortfolioReady(project){return project.state==='PUBLISHED'&&project.evidence.length>=1&&projectReadiness(project)>=80;}

@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { createRoot } from 'react-dom/client';
 import {
   Activity, Brain, BookOpen, Briefcase, ChevronRight, Command, Database,
   FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Lock, Network,
@@ -13,6 +12,7 @@ import { BASELINE_QUESTIONS } from './data/baselineQuestions';
 import { createInitialSkills, LEVELS, selectNextMission, applyAssessment } from './engine/careerEngine';
 import { calculateReadiness } from './engine/intelligenceEngine';
 import { ModuleWorkspace } from './integration/moduleWorkspace.jsx';
+import { LearningWorkspace } from './learning/LearningWorkspace.jsx';
 
 const modules = [
   ['01', 'Core / Career Architect', Brain], ['02', 'Mission Control', Target],
@@ -72,6 +72,7 @@ function App() {
         : active === '07' ? <Baseline state={state} setState={setState} setMission={setMission} />
         : active === '06' ? <SkillMatrix state={state} />
         : active === '03' ? <NextMission state={state} setMission={setMission} />
+        : active === '05' ? <LearningWorkspace state={state} setState={setState} setMission={setMission} />
         : <ModuleWorkspace module={modules.find((module) => module[0] === active)} state={state} setState={setState} setMission={setMission} />}
     </main>
   </div>;

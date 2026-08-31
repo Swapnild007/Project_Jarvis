@@ -42,7 +42,7 @@ export function LearningWorkspace({state,setState,setMission}){
     const result=scoreAnswer(answer,lesson);
     setScore(result);
     setMode('review');
-    persist({draftAnswer:answer,lastScore:result,lastAssessedAt:new Date().toISOString()});
+    persist({draftAnswer:answer,lastScore:result,lastAssessedAt:new Date().toISOString(),mode:'review'});
   };
 
   const completeLesson=()=>{
@@ -50,6 +50,7 @@ export function LearningWorkspace({state,setState,setMission}){
     const nextCompleted=completed.includes(lesson.id)?completed:[...completed,lesson.id];
     const now=new Date().toISOString();
     setCompleted(nextCompleted);
+    setMode('complete');
     const oldLevel=state.skills?.[skill]?.level||0;
     const earned=score>=85?1:score>=70?0.5:0;
     const newLevel=Math.min(5,Math.max(oldLevel,Math.ceil(oldLevel+earned)));

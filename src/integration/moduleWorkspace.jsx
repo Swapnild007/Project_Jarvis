@@ -1,184 +1,71 @@
 import React, { useMemo, useState } from 'react';
-import {
-  BookOpen, CheckCircle2, ChevronRight, Database, FlaskConical, Play,
-  Search, Shield, Target, TrendingUp, Upload, Settings, Brain, Activity,
-  GitBranch, Download, RotateCcw, Lock, SlidersHorizontal, Award,
-} from 'lucide-react';
+import { BookOpen, CheckCircle2, ChevronRight, Database, FlaskConical, Play, Search, Shield, Target, TrendingUp, Upload, Settings, Brain, Activity, GitBranch, Download, RotateCcw, Lock, SlidersHorizontal, Award } from 'lucide-react';
 import { downloadBackup, restoreBackup, clearCareerState, STATE_SCHEMA_VERSION } from './stateStore';
 import { createMission, transitionMission, addMissionEvidence, completeMission } from '../engine/missionEngine';
 
 const ACTIONS = {
-  '01': ['Assess career position', 'Define capability architecture', 'Review North Star'],
-  '02': ['View active mission', 'Start mission', 'Mark evidence'],
-  '03': ['Recalculate next mission', 'Inspect decision factors', 'Accept mission'],
-  '04': ['View Career State', 'Record checkpoint', 'Review memory'],
-  '05': ['Start lesson', 'Request deep dive', 'Open resources'],
-  '06': ['Inspect skill graph', 'Filter by domain', 'Review gaps'],
-  '07': ['Start assessment', 'Review results', 'Retest weak areas'],
-  '08': ['Open revision queue', 'Practice recall', 'Schedule review'],
-  '09': ['Open lab', 'Run experiment', 'Record lab evidence'],
-  '10': ['Open project', 'Create checkpoint', 'Publish evidence'],
-  '11': ['Review code', 'Run quality checklist', 'Record feedback'],
-  '12': ['Open security track', 'Analyze scenario', 'Run incident lab'],
-  '13': ['Study AI/LLM security', 'Research OpenAI systems', 'Threat-model agent'],
-  '14': ['Study systems', 'Practice Linux/networking', 'Design architecture'],
-  '15': ['Study cloud security', 'Run DevSecOps lab', 'Review deployment controls'],
-  '16': ['Research topic', 'Compare sources', 'Save resource'],
-  '17': ['Analyze target roles', 'Inspect skill demand', 'Compare opportunities'],
-  '18': ['Run reality audit', 'Inspect risks', 'Create corrective action'],
-  '19': ['Build transition plan', 'Review target roles', 'Track applications'],
-  '20': ['Start interview drill', 'Practice scenario', 'Score answer'],
-  '21': ['Compare certifications', 'Check readiness', 'Build certification plan'],
-  '22': ['Write journal entry', 'Review learning history', 'Search knowledge'],
-  '23': ['Open progress analytics', 'Inspect trends', 'Review evidence growth'],
-  '24': ['Create backup', 'Restore backup', 'Validate recovery'],
-  '25': ['Review system settings', 'Inspect persistence', 'Review system policy'],
+ '01':['Assess career position','Define capability architecture','Review North Star'],'02':['View active mission','Start mission','Mark evidence'],'03':['Recalculate next mission','Inspect decision factors','Accept mission'],'04':['View Career State','Record checkpoint','Review memory'],'05':['Start lesson','Request deep dive','Open resources'],'06':['Inspect skill graph','Filter by domain','Review gaps'],'07':['Start assessment','Review results','Retest weak areas'],'08':['Open revision queue','Practice recall','Schedule review'],'09':['Open lab','Run experiment','Record lab evidence'],'10':['Open project','Create checkpoint','Publish evidence'],'11':['Review code','Run quality checklist','Record feedback'],'12':['Open security track','Analyze scenario','Run incident lab'],'13':['Study AI/LLM security','Research OpenAI systems','Threat-model agent'],'14':['Study systems','Practice Linux/networking','Design architecture'],'15':['Study cloud security','Run DevSecOps lab','Review deployment controls'],'16':['Research topic','Compare sources','Save resource'],'17':['Analyze target roles','Inspect skill demand','Compare opportunities'],'18':['Run reality audit','Inspect risks','Create corrective action'],'19':['Build transition plan','Review target roles','Track applications'],'20':['Start interview drill','Practice scenario','Score answer'],'21':['Compare certifications','Check readiness','Build certification plan'],'22':['Write journal entry','Review learning history','Search knowledge'],'23':['Open progress analytics','Inspect trends','Review evidence growth']
 };
 
-const ICONS = {
-  '01': Brain, '02': Target, '03': Target, '04': Database, '05': BookOpen,
-  '06': GitBranch, '07': CheckCircle2, '08': Activity, '09': FlaskConical,
-  '10': GitBranch, '11': GitBranch, '12': Shield, '13': Brain, '14': GitBranch,
-  '15': Shield, '16': Search, '17': TrendingUp, '18': Shield, '19': Target,
-  '20': BookOpen, '21': BookOpen, '22': BookOpen, '23': Activity,
-  '24': Upload, '25': Settings,
+const DETAILS = {
+ '01':{objective:'Establish the current career position and the 2028 destination.',output:'Career architecture checkpoint',method:'Map current WFM/RTA strengths to transferable engineering capabilities, then identify the highest-value gaps.',checks:['Current role and transferable strengths captured','North Star is explicit','Top three capability gaps identified']},
+ '02':{objective:'Turn the selected mission into an executable session.',output:'Mission execution record',method:'Review the active mission, define the intended result, execute one concrete step, then record proof.',checks:['Mission understood','Concrete action completed','Result recorded']},
+ '03':{objective:'Understand why JARVIS selected the next action.',output:'Decision trace',method:'Inspect gap, prerequisites, downstream unlock value, evidence and North Star alignment before accepting.',checks:['Prerequisites satisfied','Priority understood','Mission accepted intentionally']},
+ '04':{objective:'Maintain one source of truth for the career journey.',output:'Career checkpoint',method:'Review phase, mission, capability state, evidence and recent decisions. Record a checkpoint before major pivots.',checks:['State reviewed','Checkpoint recorded','Memory is current']},
+ '05':{objective:'Convert learning into guided capability development.',output:'Lesson completion + recall note',method:'Learn one concept, explain it in your own words, practice it, then record what remains unclear.',checks:['Concept understood','Practice completed','Open questions captured']},
+ '06':{objective:'See capability, gaps and dependencies instead of course lists.',output:'Skill-gap review',method:'Inspect domains and compare current levels with targets and prerequisites.',checks:['Weak skills identified','Prerequisite chain understood','Priority gap selected']},
+ '07':{objective:'Measure capability honestly.',output:'Assessment result',method:'Attempt without notes, score performance, record confidence and identify weak areas for retest.',checks:['Attempt completed','Weak areas captured','Retest trigger defined']},
+ '08':{objective:'Protect knowledge from decay.',output:'Revision session record',method:'Use active recall on recently learned concepts and schedule the next review from performance.',checks:['Recall attempted','Errors logged','Next review planned']},
+ '09':{objective:'Build practical technical muscle in a controlled lab.',output:'Lab evidence',method:'Run an experiment, observe the result, troubleshoot one failure and document commands/findings.',checks:['Lab objective defined','Experiment executed','Findings documented']},
+ '10':{objective:'Turn skills into portfolio evidence.',output:'Project checkpoint',method:'Define a real problem, build a small working artifact, test it and document the engineering decisions.',checks:['Problem defined','Artifact works','Evidence is publishable']},
+ '11':{objective:'Develop engineering quality instincts.',output:'Code review report',method:'Review correctness, security, readability, tests and failure handling. Record actionable feedback.',checks:['Correctness checked','Security checked','Improvement actions recorded']},
+ '12':{objective:'Develop core cybersecurity operational capability.',output:'Security scenario report',method:'Analyze an incident or defensive scenario, identify indicators, containment and recovery steps.',checks:['Threat identified','Response sequence reasoned','Lessons captured']},
+ '13':{objective:'Build AI/LLM security capability without treating AI as a buzzword.',output:'Agent threat model',method:'Study model behavior, tool use, prompt/data risks and trust boundaries; connect them to security controls.',checks:['System boundary mapped','Threats identified','Controls proposed']},
+ '14':{objective:'Build systems thinking across OS, networking and architecture.',output:'Systems design note',method:'Trace how processes, memory, filesystems, networks and services interact in a real system.',checks:['Components identified','Interactions explained','Failure mode considered']},
+ '15':{objective:'Build cloud and DevSecOps delivery capability.',output:'Secure delivery checkpoint',method:'Design a pipeline with source control, tests, dependency checks, secrets handling and deployment gates.',checks:['Pipeline stages mapped','Security controls placed','Rollback considered']},
+ '16':{objective:'Turn research into reliable decisions.',output:'Source comparison',method:'Compare authoritative sources, date the findings, record uncertainty and save only useful references.',checks:['Sources compared','Freshness checked','Conclusion documented']},
+ '17':{objective:'Measure the market against actual capability.',output:'Role-demand snapshot',method:'Compare target roles, required skills and evidence expectations with the current skill graph.',checks:['Roles compared','Skill demand captured','Gap to market stated']},
+ '18':{objective:'Prevent self-deception and drift.',output:'Reality audit',method:'Challenge progress claims against evidence, time available, prerequisites and real job requirements.',checks:['Claims challenged','Risks listed','Corrective action chosen']},
+ '19':{objective:'Translate capability into a realistic job transition.',output:'Transition plan',method:'Define target roles, evidence milestones, application timing, positioning and fallback routes.',checks:['Target roles chosen','Evidence milestones defined','Transition risks addressed']},
+ '20':{objective:'Convert knowledge into interview performance.',output:'Scored interview response',method:'Answer a realistic technical or behavioral scenario, score clarity and correctness, then improve it.',checks:['Question answered','Technical reasoning shown','Improved answer recorded']},
+ '21':{objective:'Use certification strategically, not as a substitute for mastery.',output:'Certification decision',method:'Compare relevance, prerequisites, cost, market value and overlap with practical evidence.',checks:['Relevance checked','Readiness checked','Decision justified']},
+ '22':{objective:'Make learning durable and searchable.',output:'Learning journal entry',method:'Record what changed in your understanding, what you built and what should be revisited.',checks:['Learning captured','Mistake captured','Next review captured']},
+ '23':{objective:'Inspect progress as evidence, not feelings.',output:'Progress checkpoint',method:'Review capability movement, evidence growth, mission history and remaining dependency bottlenecks.',checks:['Trend inspected','Evidence counted','Next bottleneck identified']}
 };
 
-function recordAction(name, id, label, setState, setMission) {
-  setMission(`${name}: ${label}`);
-  setState((current) => ({
-    ...current,
-    evidence: { ...(current.evidence || {}), [id]: { action: label, at: new Date().toISOString() } },
-    activity: [
-      { text: `${name}: ${label}`, time: new Date().toLocaleTimeString(), type: 'module' },
-      ...(current.activity || []),
-    ].slice(0, 20),
-  }));
+const ICONS={'01':Brain,'02':Target,'03':Target,'04':Database,'05':BookOpen,'06':GitBranch,'07':CheckCircle2,'08':Activity,'09':FlaskConical,'10':GitBranch,'11':GitBranch,'12':Shield,'13':Brain,'14':GitBranch,'15':Shield,'16':Search,'17':TrendingUp,'18':Shield,'19':Target,'20':BookOpen,'21':BookOpen,'22':BookOpen,'23':Activity,'24':Upload,'25':Settings};
+
+function ensureActiveMission(state){return state.activeMission||createMission(state);}
+function pushActivity(state,text){return [{text,time:new Date().toLocaleTimeString(),type:'module'},...(state.activity||[])].slice(0,30);}
+
+export function ModuleWorkspace({module,state,setState,setMission}){
+ const [id,name]=module||[];
+ if(id==='24')return <BackupWorkspace state={state} setState={setState} setMission={setMission}/>;
+ if(id==='25')return <SettingsWorkspace state={state} setState={setState} setMission={setMission}/>;
+ const Icon=ICONS[id]||Brain, actions=ACTIONS[id]||[], detail=DETAILS[id]||{objective:'Work on the selected career capability.',output:'Evidence record',method:'Execute the operation and document the result.',checks:['Action completed','Result recorded','Next step identified']};
+ const [active,setActive]=useState(0),[notes,setNotes]=useState(state.workspace?.[id]?.notes||''),[checks,setChecks]=useState(state.workspace?.[id]?.checks||[]);
+ const [evidenceTitle,setEvidenceTitle]=useState(''),[evidenceDetail,setEvidenceDetail]=useState(''),[evidenceScore,setEvidenceScore]=useState(70);
+ const evidence=state.evidence||{},mission=state.activeMission;
+ const readiness=useMemo(()=>Object.keys(evidence).length,[evidence]);
+ const persistWorkspace=(patch)=>setState(current=>({...current,workspace:{...(current.workspace||{}),[id]:{...(current.workspace?.[id]||{}),...patch}}}));
+ const toggleCheck=(i)=>{const next=checks.includes(i)?checks.filter(x=>x!==i):[...checks,i];setChecks(next);persistWorkspace({checks:next});};
+ const run=()=>{const current=ensureActiveMission(state);const started=current.status==='proposed'?transitionMission(current,'active'):current;setState(currentState=>({...currentState,activeMission:started,activity:pushActivity(currentState,`${name}: ${actions[active]}`)}));setMission(`${name}: ${actions[active]}`);};
+ const submitEvidence=()=>{const current=ensureActiveMission(state);const started=current.status==='proposed'?transitionMission(current,'active'):current;const submitted=addMissionEvidence(started,{kind:id==='09'?'lab':id==='10'?'project':'demonstration',title:evidenceTitle||detail.output,detail:evidenceDetail||notes||`Completed ${actions[active]}.`,score:evidenceScore});setState(current=>({...current,activeMission:submitted,evidence:{...(current.evidence||{}),[id]:{action:actions[active],at:new Date().toISOString(),score:evidenceScore,title:evidenceTitle||detail.output}},activity:[{text:`${name}: evidence submitted (${evidenceScore}/100)`,time:new Date().toLocaleTimeString(),type:'evidence'},...(current.activity||[])].slice(0,30)}));setMission(`${name}: Evidence submitted`);setEvidenceTitle('');setEvidenceDetail('');};
+ const evaluate=()=>{if(!mission?.evidence?.length)return;const result=completeMission(state,mission);setState(result);setMission(result.currentMission);};
+ return <section className="module-page">
+  <div className="module-icon"><Icon size={28}/></div><p className="eyebrow">MODULE {id} · INTELLIGENT WORKSPACE</p><h1>{name}</h1>
+  <p className="module-copy">JARVIS does more than expose a module name. This workspace gives the module an objective, an execution method, measurable checks and a proof path, all tied to the shared Career State.</p>
+  <div className="module-grid">
+   <div className="card"><div className="card-head"><span>MISSION BRIEF</span><Target size={16}/></div><h2>{detail.objective}</h2><p>{detail.method}</p><div className="state-row"><span>Expected output</span><b>{detail.output}</b></div><div className="state-row"><span>Current operation</span><b>{actions[active]}</b></div><div className="action-list">{actions.map((action,index)=><button key={action} className={active===index?'selected':''} onClick={()=>setActive(index)}><span>{String(index+1).padStart(2,'0')}</span>{action}<ChevronRight size={15}/></button>)}</div><button onClick={run}><Play size={15}/> Start operation</button></div>
+   <div className="card"><div className="card-head"><span>CAREER STATE LINK</span><Database size={16}/></div><div className="state-row"><span>Phase</span><b>{state.phase}</b></div><div className="state-row"><span>Current mission</span><b>{state.currentMission}</b></div><div className="state-row"><span>Mission status</span><b>{mission?.status?.toUpperCase()||'PROPOSED'}</b></div><div className="state-row"><span>Module evidence</span><b>{evidence[id]?'RECORDED':'NONE'}</b></div><div className="state-row"><span>Evidence modules</span><b>{readiness}</b></div><p className="muted">A page visit never raises capability. Execution, assessment and evidence do.</p></div>
+  </div>
+  <div className="module-grid">
+   <div className="card"><div className="card-head"><span>EXECUTION CHECKLIST</span><CheckCircle2 size={16}/></div><p>Use these checks as the minimum definition of done for this module operation.</p>{detail.checks.map((item,index)=><label key={item} className="setting-row"><span>{item}</span><input type="checkbox" checked={checks.includes(index)} onChange={()=>toggleCheck(index)}/></label>)}<textarea value={notes} onChange={e=>{setNotes(e.target.value);persistWorkspace({notes:e.target.value});}} placeholder="Session notes: what did you learn, build, test, break or fix?" rows="4"/></div>
+   <div className="card"><div className="card-head"><span>PROOF OF CAPABILITY</span><Award size={16}/></div><p>Submit concrete evidence. JARVIS will evaluate the mission instead of assuming mastery.</p><input value={evidenceTitle} onChange={e=>setEvidenceTitle(e.target.value)} placeholder={`Evidence title · ${detail.output}`}/><textarea value={evidenceDetail} onChange={e=>setEvidenceDetail(e.target.value)} placeholder="What did you actually produce or demonstrate?" rows="4"/><label className="setting-row"><span>Evidence score: {evidenceScore}/100</span><input type="range" min="0" max="100" value={evidenceScore} onChange={e=>setEvidenceScore(Number(e.target.value))}/></label><div><button onClick={submitEvidence}><CheckCircle2 size={15}/> Submit evidence</button><button onClick={evaluate} disabled={!mission?.evidence?.length}><Award size={15}/> Evaluate</button></div>{mission?.feedback&&<p className="status-note">{mission.feedback}</p>}</div>
+  </div>
+ </section>;
 }
 
-function ensureActiveMission(state) {
-  if (state.activeMission) return state.activeMission;
-  return createMission(state);
-}
+function BackupWorkspace({state,setState,setMission}){const [message,setMessage]=useState(''),[busy,setBusy]=useState(false);const exportState=()=>{downloadBackup(state);setMessage('Backup exported successfully.');setMission('Backup / Recovery: Export Career State');};const importState=e=>{const file=e.target.files?.[0];if(!file)return;setBusy(true);restoreBackup(file,r=>{setState(r);setMessage('Backup restored. Career State reloaded.');setBusy(false);setMission('Backup / Recovery: Restore Career State');},err=>{setMessage(err.message);setBusy(false);});e.target.value='';};return <section className="module-page"><div className="module-icon"><Upload size={28}/></div><p className="eyebrow">MODULE 24 · RECOVERY CONTROL</p><h1>Backup / Recovery / Export</h1><p className="module-copy">Your Career State stays in the browser, but it should never be trapped there. Export a versioned JSON backup and restore it on a new browser or device.</p><div className="module-grid"><div className="card"><div className="card-head"><span>BACKUP</span><Download size={16}/></div><h2>Export complete Career State</h2><p>Includes skills, assessments, evidence, missions, workspace notes and activity.</p><button onClick={exportState}><Download size={15}/> Export JSON backup</button></div><div className="card"><div className="card-head"><span>RECOVERY</span><RotateCcw size={16}/></div><h2>Restore a JARVIS backup</h2><p>Only files created by JARVIS Career OS are accepted.</p><label className="file-button"><Upload size={15}/> {busy?'Reading backup…':'Choose backup file'}<input type="file" accept="application/json,.json" onChange={importState}/></label></div></div><div className="card status-card"><div className="state-row"><span>Schema</span><b>v{STATE_SCHEMA_VERSION}</b></div><div className="state-row"><span>Current state</span><b>{state.baseline?'ACTIVE':'INITIALIZE'}</b></div>{message&&<p>{message}</p>}</div></section>}
 
-export function ModuleWorkspace({ module, state, setState, setMission }) {
-  const [id, name] = module || [];
-  if (id === '24') return <BackupWorkspace state={state} setState={setState} setMission={setMission} />;
-  if (id === '25') return <SettingsWorkspace state={state} setState={setState} setMission={setMission} />;
-
-  const Icon = ICONS[id] || Brain;
-  const actions = ACTIONS[id] || [];
-  const [active, setActive] = useState(0);
-  const [evidenceTitle, setEvidenceTitle] = useState('');
-  const [evidenceDetail, setEvidenceDetail] = useState('');
-  const [evidenceScore, setEvidenceScore] = useState(70);
-  const evidence = state.evidence || {};
-  const mission = state.activeMission;
-  const readiness = useMemo(() => Object.keys(evidence).length, [evidence]);
-
-  const run = () => {
-    const currentMission = ensureActiveMission(state);
-    const started = transitionMission(currentMission, 'active');
-    setState((current) => ({ ...current, activeMission: started }));
-    recordAction(name, id, actions[active] || 'Review module', setState, setMission);
-  };
-
-  const submitEvidence = () => {
-    const currentMission = ensureActiveMission(state);
-    const started = currentMission.status === 'proposed' ? transitionMission(currentMission, 'active') : currentMission;
-    const submitted = addMissionEvidence(started, {
-      kind: id === '09' ? 'lab' : id === '10' ? 'project' : 'demonstration',
-      title: evidenceTitle || `${name} evidence`,
-      detail: evidenceDetail || 'Demonstrated the selected mission action.',
-      score: evidenceScore,
-    });
-    setState((current) => ({
-      ...current,
-      activeMission: submitted,
-      evidence: { ...(current.evidence || {}), [id]: { action: actions[active], at: new Date().toISOString(), score: evidenceScore, title: evidenceTitle } },
-      activity: [{ text: `${name}: evidence submitted (${evidenceScore}/100)`, time: new Date().toLocaleTimeString(), type: 'evidence' }, ...(current.activity || [])].slice(0, 20),
-    }));
-    setMission(`${name}: Evidence submitted`);
-    setEvidenceTitle('');
-    setEvidenceDetail('');
-  };
-
-  const evaluate = () => {
-    if (!mission?.evidence?.length) return;
-    const result = completeMission(state, mission);
-    setState(result);
-    setMission(result.currentMission);
-  };
-
-  return (
-    <section className="module-page">
-      <div className="module-icon"><Icon size={28} /></div>
-      <p className="eyebrow">MODULE {id} · FUNCTIONAL WORKSPACE</p>
-      <h1>{name}</h1>
-      <p className="module-copy">This workspace operates on the shared Career State. Actions create traceable activity, while mission evidence must be submitted and evaluated before capability is considered demonstrated.</p>
-      <div className="module-grid">
-        <div className="card">
-          <div className="card-head"><span>MISSION WORKSPACE</span><Target size={16} /></div>
-          <h2>{actions[active]}</h2>
-          <p>Choose an operation, execute it, then record what you actually learned, built, tested or proved.</p>
-          <div className="action-list">
-            {actions.map((action, index) => <button key={action} className={active === index ? 'selected' : ''} onClick={() => setActive(index)}><span>{String(index + 1).padStart(2, '0')}</span>{action}<ChevronRight size={15} /></button>)}
-          </div>
-          <button onClick={run}><Play size={15} /> Execute action</button>
-        </div>
-        <div className="card">
-          <div className="card-head"><span>CAREER STATE</span><Database size={16} /></div>
-          <div className="state-row"><span>Phase</span><b>{state.phase}</b></div>
-          <div className="state-row"><span>Current mission</span><b>{state.currentMission}</b></div>
-          <div className="state-row"><span>Mission status</span><b>{mission?.status?.toUpperCase() || 'PROPOSED'}</b></div>
-          <div className="state-row"><span>Module evidence</span><b>{evidence[id] ? 'RECORDED' : 'NONE'}</b></div>
-          <div className="state-row"><span>Evidence modules</span><b>{readiness}</b></div>
-          <p className="muted">Evidence is durable only when tied to an action, result, artifact or assessment.</p>
-        </div>
-      </div>
-      <div className="card evidence-card">
-        <div className="card-head"><span>PROOF OF CAPABILITY</span><Award size={16} /></div>
-        <p>Do not claim mastery from page visits. Submit concrete proof, score it honestly, then let JARVIS evaluate the mission.</p>
-        <input value={evidenceTitle} onChange={(e) => setEvidenceTitle(e.target.value)} placeholder="Evidence title" />
-        <textarea value={evidenceDetail} onChange={(e) => setEvidenceDetail(e.target.value)} placeholder="What did you build, test, solve or demonstrate?" rows="3" />
-        <label className="setting-row"><span>Evidence score: {evidenceScore}/100</span><input type="range" min="0" max="100" value={evidenceScore} onChange={(e) => setEvidenceScore(Number(e.target.value))} /></label>
-        <div className="evidence-actions"><button onClick={submitEvidence}><CheckCircle2 size={15} /> Submit evidence</button><button onClick={evaluate} disabled={!mission?.evidence?.length}><Award size={15} /> Evaluate mission</button></div>
-        {mission?.feedback && <p className="status-note">{mission.feedback}</p>}
-      </div>
-    </section>
-  );
-}
-
-function BackupWorkspace({ state, setState, setMission }) {
-  const [message, setMessage] = useState('');
-  const [busy, setBusy] = useState(false);
-  const exportState = () => { downloadBackup(state); setMessage('Backup exported successfully.'); setMission('Backup / Recovery: Export Career State'); };
-  const importState = (event) => {
-    const file = event.target.files?.[0]; if (!file) return; setBusy(true);
-    restoreBackup(file, (restored) => { setState(restored); setMessage('Backup restored. Career State reloaded.'); setBusy(false); setMission('Backup / Recovery: Restore Career State'); }, (error) => { setMessage(error.message); setBusy(false); });
-    event.target.value = '';
-  };
-  return (
-    <section className="module-page">
-      <div className="module-icon"><Upload size={28} /></div><p className="eyebrow">MODULE 24 · RECOVERY CONTROL</p><h1>Backup / Recovery / Export</h1>
-      <p className="module-copy">Your Career State stays in the browser, but it should never be trapped there. Export a versioned JSON backup and restore it on a new browser or device.</p>
-      <div className="module-grid"><div className="card"><div className="card-head"><span>BACKUP</span><Download size={16} /></div><h2>Export complete Career State</h2><p>Includes skills, assessments, evidence, missions and activity.</p><button onClick={exportState}><Download size={15} /> Export JSON backup</button></div><div className="card"><div className="card-head"><span>RECOVERY</span><RotateCcw size={16} /></div><h2>Restore a JARVIS backup</h2><p>Only files created by JARVIS Career OS are accepted.</p><label className="file-button"><Upload size={15} /> {busy ? 'Reading backup…' : 'Choose backup file'}<input type="file" accept="application/json,.json" onChange={importState} /></label></div></div>
-      <div className="card status-card"><div className="state-row"><span>Schema</span><b>v{STATE_SCHEMA_VERSION}</b></div><div className="state-row"><span>Current state</span><b>{state.baseline ? 'ACTIVE' : 'INITIALIZE'}</b></div>{message && <p>{message}</p>}</div>
-    </section>
-  );
-}
-
-function SettingsWorkspace({ state, setState, setMission }) {
-  const [confirm, setConfirm] = useState(false);
-  const settings = state.settings || { reducedMotion: false, compactMode: false };
-  const update = (key, value) => setState((current) => ({ ...current, settings: { ...(current.settings || {}), [key]: value } }));
-  const reset = () => { if (!confirm) { setConfirm(true); return; } clearCareerState(); window.location.reload(); };
-  return (
-    <section className="module-page">
-      <div className="module-icon"><Settings size={28} /></div><p className="eyebrow">MODULE 25 · SYSTEM CONTROL</p><h1>JARVIS System Settings</h1>
-      <p className="module-copy">System-level controls are intentionally conservative. Settings affect presentation and recovery behavior, never the locked career architecture.</p>
-      <div className="module-grid"><div className="card"><div className="card-head"><span>INTERFACE</span><SlidersHorizontal size={16} /></div><label className="setting-row"><span>Reduced motion</span><input type="checkbox" checked={!!settings.reducedMotion} onChange={(e) => update('reducedMotion', e.target.checked)} /></label><label className="setting-row"><span>Compact mode</span><input type="checkbox" checked={!!settings.compactMode} onChange={(e) => update('compactMode', e.target.checked)} /></label><div className="state-row"><span>Persistence</span><b>LOCAL STATE ACTIVE</b></div></div><div className="card"><div className="card-head"><span>SAFETY</span><Lock size={16} /></div><p>Locked career modules cannot be rewritten by normal module actions.</p><div className="state-row"><span>Career architecture</span><b>PROTECTED</b></div><div className="state-row"><span>State schema</span><b>v{STATE_SCHEMA_VERSION}</b></div><button className="danger" onClick={reset}><RotateCcw size={15} /> {confirm ? 'Confirm full reset' : 'Reset local Career State'}</button>{confirm && <button onClick={() => setConfirm(false)}>Cancel</button>}</div></div>
-      <div className="card status-card"><CheckCircle2 size={16} /> Settings are stored inside the shared Career State.</div>
-    </section>
-  );
-}
+function SettingsWorkspace({state,setState,setMission}){const [confirm,setConfirm]=useState(false);const settings=state.settings||{reducedMotion:false,compactMode:false};const update=(key,value)=>{setState(current=>({...current,settings:{...(current.settings||{}),[key]:value}}));setMission(`System Settings: ${key} updated`);};const reset=()=>{if(!confirm){setConfirm(true);return;}clearCareerState();window.location.reload();};return <section className="module-page"><div className="module-icon"><Settings size={28}/></div><p className="eyebrow">MODULE 25 · SYSTEM CONTROL</p><h1>JARVIS System Settings</h1><p className="module-copy">System-level controls affect presentation and recovery behavior, never the locked career architecture.</p><div className="module-grid"><div className="card"><div className="card-head"><span>INTERFACE</span><SlidersHorizontal size={16}/></div><label className="setting-row"><span>Reduced motion</span><input type="checkbox" checked={!!settings.reducedMotion} onChange={e=>update('reducedMotion',e.target.checked)}/></label><label className="setting-row"><span>Compact mode</span><input type="checkbox" checked={!!settings.compactMode} onChange={e=>update('compactMode',e.target.checked)}/></label><div className="state-row"><span>Persistence</span><b>LOCAL STATE ACTIVE</b></div></div><div className="card"><div className="card-head"><span>SAFETY</span><Lock size={16}/></div><p>Locked career modules cannot be rewritten by normal module actions.</p><div className="state-row"><span>Career architecture</span><b>PROTECTED</b></div><div className="state-row"><span>State schema</span><b>v{STATE_SCHEMA_VERSION}</b></div><button className="danger" onClick={reset}><RotateCcw size={15}/> {confirm?'Confirm full reset':'Reset local Career State'}</button>{confirm&&<button onClick={()=>setConfirm(false)}>Cancel</button>}</div></div><div className="card status-card"><CheckCircle2 size={16}/> Settings are stored inside the shared Career State.</div></section>}

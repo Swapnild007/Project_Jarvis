@@ -1,0 +1,8 @@
+export const projectCatalog=[
+{id:'project-01',stage:'FOUNDATION',title:'Technical Foundations Evidence Pack',goal:'Demonstrate core computing, Git, SQL and programming capability',skills:['computer-fundamentals','git','sql','programming-fundamentals'],deliverables:['README','working exercises','test evidence']},
+{id:'project-02',stage:'SYSTEMS',title:'Linux Security Investigation Toolkit',goal:'Build a practical system inspection and evidence workflow',skills:['linux','bash','security-fundamentals'],deliverables:['tool','tests','documentation']},
+{id:'project-03',stage:'SOC',title:'Mini SOC Detection Pipeline',goal:'Collect logs, detect activity and document an incident',skills:['siem','logs','detection','incident-response'],deliverables:['pipeline','detections','incident report']},
+{id:'project-04',stage:'SECURITY_ENGINEERING',title:'Security Automation Platform',goal:'Automate repeatable security investigation tasks',skills:['python','apis','automation','security-engineering'],deliverables:['application','tests','architecture document']},
+{id:'project-05',stage:'AI_SECURITY',title:'Secure LLM Agent Lab',goal:'Design, test and defend an LLM/agent workflow',skills:['llm-fundamentals','agents','prompt-injection','ai-threat-modeling'],deliverables:['threat model','test suite','mitigation implementation','security report']},
+{id:'capstone',stage:'CAPSTONE',title:'JARVIS Security Intelligence Platform',goal:'Integrate security engineering, automation and AI security into a portfolio-grade system',skills:['security-engineering','cloud-security','ai-security'],deliverables:['production-style application','architecture','security assessment','documentation','demo']}
+];

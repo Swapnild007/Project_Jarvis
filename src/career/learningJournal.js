@@ -1,0 +1,4 @@
+export const journalEntryTypes=['learning','lab','project','failure','breakthrough','reflection','interview','research'];
+export function createJournalEntry(input={}){if(!input.title||!input.body)throw new Error('Journal entry requires title and body');return {id:`journal-${Date.now()}`,type:input.type||'learning',title:input.title,body:input.body,skillIds:input.skillIds||[],evidence:input.evidence||[],createdAt:new Date().toISOString()};}
+export function journalStats(entries=[]){const total=entries.length;const byType=entries.reduce((a,e)=>(a[e.type]=(a[e.type]||0)+1,a),{});const skills=[...new Set(entries.flatMap(e=>e.skillIds||[]))];return {total,byType,skillsCovered:skills.length};}
+export function journalSearch(entries=[],term=''){const q=term.trim().toLowerCase();if(!q)return entries;return entries.filter(e=>[e.title,e.body,e.type,...(e.skillIds||[])].join(' ').toLowerCase().includes(q));}

@@ -1,0 +1,3 @@
+export const transitionStages=['POSITION','GAP_ANALYSIS','EVIDENCE_BUILD','PORTFOLIO','APPLICATION','NETWORK','INTERVIEW','OFFER'];
+export function transitionPlan(profile={},target={}){const gaps=target.skills||[];const skills=profile.skills||{};const missing=gaps.filter(id=>(skills[id]?.level||0)<(target.minimumLevel?.[id]||1));return {targetRole:target.name||'Target role',stage:missing.length?'GAP_ANALYSIS':'EVIDENCE_BUILD',missingSkills:missing,actions:missing.map(id=>`Build evidence for ${id}`)};}
+export function applicationReadiness(state={}){const audit=state.auditScore||0,projects=state.portfolioProjects||0,evidence=state.evidenceCount||0;return Math.min(100,Math.round(audit*.5+Math.min(projects,4)*8+Math.min(evidence,10)*2));}
